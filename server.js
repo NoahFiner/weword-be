@@ -41,10 +41,12 @@ const getWordError = (word, errorJSON) => {
   if("maxWords" in errorJSON && word.split(' ').length > errorJSON.maxWords) {
     return "submission has more words than " + errorJSON.maxWords;
   }
-  if("bannedCharacters" in errorJSON && errorJSON.bannedCharacters.some(char => word.includes(char))) {
+
+  lowerCaseWord = word.toLowerCase();
+  if("bannedCharacters" in errorJSON && errorJSON.bannedCharacters.some(char => lowerCaseWord.includes(char.toLowerCase()))) {
     return "submission contains restricted character";
   }
-  if("bannedWords" in errorJSON && errorJSON.bannedWords.some(bannedWord => word.split(' ').some(compWord => compWord === bannedWord))) {
+  if("bannedWords" in errorJSON && errorJSON.bannedWords.some(bannedWord => lowerCaseWord.split(' ').some(compWord => compWord === bannedWord.toLowerCase()))) {
     return "submission contains restricted words";
   }
   return null;
@@ -68,7 +70,9 @@ io.on("connection", socket => {
             //TODO: make the timeout longer for the person that submitted the word
             io.emit("enable");
             timeout = null;
-          }, 500);
+          }, 750);
+        } else {
+          callback("duplicate word");
         }
       }
     });
