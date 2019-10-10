@@ -17,15 +17,36 @@ server.listen(port, () => console.log('listening on port', port));
 
 let words = [];
 
+let timeout;
+
+const validWord = word => {
+  if(word.split(' ').length === 1) {
+    return true;
+  }
+  return false;
+}
+
 io.on("connection", socket => {
     console.log("new user connected");
     socket.emit("sendWords", words);
 
-    socket.on("addWord", word => {
-        console.log("tryna add word", word);
-        words.push(word);
-        console.log(words);
-        io.emit("sendWords", words);
+    socket.on("addWord", (word, callback) => {
+      if(!validWord(word)) {
+        callback("invalid word");
+      } else {
+        if(!timeout) {
+          words.push(word);
+          callback();
+          io.emit("sendWords", words);
+          io.emit("disable");
+          timeout = setTimeout(() => {
+            //TODO: make the timeout longer for the person that submitted the word
+            io.emit("enable");
+            timeout = null;
+          }, 500);
+        }
+      }
     });
+
     socket.on("disconnect", () => console.log("client disconnected"));
 });
