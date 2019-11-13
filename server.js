@@ -17,10 +17,10 @@ const wordRouter = require('./routes/words');
 const {getWordError, baseErrorJSON} = require('./helpers/wordErrors');
 
 const app = express();
+app.use(cors());
 app.use(index);
 app.use(storyRouter);
 app.use(wordRouter);
-app.use(cors());
 app.use(bodyParser.json());
 
 mongoose.connect('mongodb://127.0.0.1:27017/stories', { useNewUrlParser: true, useCreateIndex: true });
