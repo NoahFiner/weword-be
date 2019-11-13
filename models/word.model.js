@@ -1,11 +1,11 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema
-const Word = new Schema({
+const wordModel = new Schema({
     author: {
         type: String,
-        required: true,
+        default: "Guest"
     },
-    contents: {
+    word: {
         type: String,
         required: true,
         trim: true,
@@ -18,4 +18,4 @@ const Word = new Schema({
 {
     timestamps: true
 });
-module.exports = mongoose.model('Word', Word);
+module.exports = mongoose.model('Word', wordModel);

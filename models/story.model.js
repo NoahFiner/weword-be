@@ -1,6 +1,9 @@
 const mongoose = require('mongoose');
-const Schema = mongoose.Schema
-const Story = new Schema({
+const Schema = mongoose.Schema;
+
+const {baseErrorJSON} = require('../helpers/wordErrors');
+
+const storyModel = new Schema({
     // rules: {
     //     type: Object
     // },
@@ -14,10 +17,20 @@ const Story = new Schema({
         required: true,
         trim: true,
     },
+    length: {
+        type: Number,
+        default: 0,
+    },
+    rules: {
+        type: Object,
+        default: baseErrorJSON,
+    },
     words: [
         {
             type: mongoose.Schema.Types.ObjectId, ref: 'Word',
         }
     ]
+}, {
+    timestamps: true
 });
-module.exports = mongoose.model('Story', Story);
+module.exports = mongoose.model('Story', storyModel);
