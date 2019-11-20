@@ -16,8 +16,6 @@ const StoriesController = {
     },
     async create(req, res) {
         try {
-            console.log("tryna make new story");
-            console.log(req);
             const story = new Story({
                 name: req.query.name,
                 description: req.query.description,
