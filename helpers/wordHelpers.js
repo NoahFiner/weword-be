@@ -19,8 +19,6 @@ const writeWord = async (storyId, wordText, author) => {
     story.words.push(word._id);
     story.length += 1;
 
-    console.log(word);
-
     await story.save();
 
     return word;
@@ -29,7 +27,6 @@ const writeWord = async (storyId, wordText, author) => {
 const getWords = async (storyId) => {
     const story = await Story.findById(storyId).populate('words');
     if(!story) throw new Error("No stories found");
-    console.log("returning", story.words);
     return story.words;
 }
 

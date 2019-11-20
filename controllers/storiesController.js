@@ -16,6 +16,8 @@ const StoriesController = {
     },
     async create(req, res) {
         try {
+            console.log("tryna make new story");
+            console.log(req);
             const story = new Story({
                 name: req.query.name,
                 description: req.query.description,
@@ -30,7 +32,7 @@ const StoriesController = {
     },
     async delete(req, res) {
         try {
-            const story = await Story.findById(req.params.id)
+            const story = await Story.findById(req.params.id);
             story.remove();
             res.send({story}).status(200);
         } catch(error) {
