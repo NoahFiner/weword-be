@@ -36,29 +36,61 @@ const io = socketIo(server);
 
 server.listen(port, () => console.log('listening on port', port));
 
-let words = [];
+let words = {};
 
-let timeout;
+let timeout = {};
+
+const {writeWord, getWords} = require("./helpers/wordHelpers");
 
 io.on("connection", socket => {
     console.log("new user connected");
-    socket.emit("sendWords", words);
 
-    socket.on("addWord", (word, callback) => {
+    socket.on('join', async ({room}) => {
+      try {
+        socket.join(room);
+
+        // if the words for this story haven't been loaded yet
+        if(!(room in words)) {
+          try {
+            words[room] = await getWords(room);
+          } catch(error) {
+            socket.emit("sendWords", []);
+          }
+        }
+        socket.emit("sendWords", words[room]);
+      } catch(error) {
+        callback(error);
+      }
+    });
+
+    socket.on("addWord", ({word, room}, callback) => {
       const error = getWordError(word, baseErrorJSON);
       if(error) {
         callback(error);
       } else {
-        if(!timeout) {
-          words.push(word);
-          callback();
-          io.emit("sendWords", words);
-          io.emit("disable");
-          timeout = setTimeout(() => {
-            //TODO: make the timeout longer for the person that submitted the word
-            io.emit("enable");
-            timeout = null;
-          }, 750);
+        if(!timeout[room]) {
+          try {
+            words[room].push({word});
+
+            callback();
+
+            io.to(room).emit("sendWords", words[room]);
+            io.to(room).emit("disable");
+
+            // TODO: error checking
+
+            // TODO: make this promise based also or something
+            timeout[room] = setTimeout(async () => {
+              // Room's id is going to be the storyId too
+              writtenWord = await writeWord(room, word);
+              words[room] = await getWords(room);
+              //TODO: make the timeout longer for the person that submitted the word
+              io.to(room).emit("enable");
+              timeout[room] = null;
+            }, 750);
+          } catch(error) {
+            callback(error);
+          }
         } else {
           callback("duplicate word");
         }
